@@ -40,7 +40,7 @@
   
       ,"page1": {
           "title": "About Me",
-          "content": "This website is powered by fastpages 1. . a blogging platform that natively supports Jupyter notebooks in addition to other formats. &#8617; . |",
+          "content": "Hi, I’m Kyle. This blog is a place for me to explore various machine learning research areas. I’ll also explore some various software engineering topics of interest. .",
           "url": "https://kylejackson.org/about/",
           "relUrl": "/about/",
           "date": ""
