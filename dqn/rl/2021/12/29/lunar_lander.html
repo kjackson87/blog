@@ -81,7 +81,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      6 min read
+      8 min read
     
 </span></p>
 
@@ -141,7 +141,15 @@ window.onload = wrap_img;
 <a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
 </h1>
 <p>Way back in 2013, DeepMind presented the Deep Q-Network (DQN) agent applied to Atari 2600 games. This agent grabbed screenshots from Atari games as input and used Q-learning to predict and take the best action. With traditional Q-learning, the entire state space must be represented in the Q-table, the table that stores state-action pairs with their Q-values. DQN uses a neural network as a function estimator to estimate this Q-fuction, rather than storing the Q-values explicitely. <a class="citation" href="#mnih2013playing">(Mnih et al., 2013)</a></p>
-<p>Here, we'll implement a simplified version of the DQN agent applied to the Gym Lunar Lander environment.</p>
+<p>Here, we'll implement a simplified version of the DQN agent applied to the Gym Lunar Lander environment. For this first implementation, rather than take screen grabs and use those to build our state, we'll use the state provided by Gym directly, removing that task to focus more explicitely on the algorithm itself. In a follow-up post, we'll drop the built in state and instead use game pixels to build the state.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Start by importing our libraries. We check if we're running in Google Colab to install additional libraries.</p>
 
 </div>
 </div>
@@ -180,6 +188,14 @@ window.onload = wrap_img;
 </div>
     
 
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Set a seed for experiment reproducability.</p>
+
+</div>
+</div>
+</div>
     
     
 <div class="cell border-box-sizing code_cell rendered">
@@ -197,6 +213,14 @@ window.onload = wrap_img;
 </div>
     
 
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Our first step is to define our neural network. We'll use a stardard fully connected neural network with 4 hidden layers, each with 64 nodes except the last, which starts to trim down before the output layer. We use relus as our activation functions between layers.</p>
+
+</div>
+</div>
+</div>
     
     
 <div class="cell border-box-sizing code_cell rendered">
@@ -205,10 +229,7 @@ window.onload = wrap_img;
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DQN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-  <span class="sd">"""</span>
-<span class="sd">  Class adapted from PyTorch example:</span>
-<span class="sd">  https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html</span>
-<span class="sd">  """</span>
+    
 
   <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -235,6 +256,15 @@ window.onload = wrap_img;
 </div>
     
 
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>When iterating through environments, we receive immediate feedback from the environment in the form of rewards. In a typical Q-learning algorithm, the Q-table is updated every iteration by calculating the Bellman equation for a given state-action pair. For our DQN agent, this won't work so well. We have two problems. One, since we receive rewards and want to make an update immediately, we only have a batch of one to calculate the gradient from before making our next move, and two, sequential actions and rewards are highly correlated. Concretely, the action and received reward of state (s<em>t) is directly influenced by the action and reward received at state (s</em>{t-1}).</p>
+<p>To solve these two problems, we introduce a buffer to store <em>experience tuples</em>, defined as a tuple of a state, action, reward, and next state. For implementation reasons, we also store if the action resulted in a termination of the environment. The buffer of these tuples solves the batching problem for calculating gradients, but if we just take sequential experiences, we'll end up still having highly correlated samples. Instead, this is where Mnih, et al. introduced <em>Replay Memory</em>. When sampling from this buffer, we sample randomly rather than take the (n) most recent samples. This solves our correlation issue, and keeps the buffer quite simple. <a class="citation" href="#mnih2013playing">(Mnih et al., 2013)</a></p>
+
+</div>
+</div>
+</div>
     
     
 <div class="cell border-box-sizing code_cell rendered">
