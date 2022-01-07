@@ -58,6 +58,9 @@ annotations: false
 # Set this to true to display tags on each post
 show_tags: true
 
+# Set permalink
+# permalink: /:categories/:title/
+
 # Add your Google Analytics ID here if you have one and want to use it
 google_analytics:
 
